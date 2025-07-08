@@ -1,12 +1,12 @@
 # FastAPI + Supabase Backend
 
-## Installation (you won't be able tu use my supabase DB but you can modify it with your own)
+## Installation
 
 Note: You won't be able to use my Supabase project because the API keys are private.
 However, you can easily connect your own Supabase instance by updating the .env file.
 
 ### 1. Clone the repository
-`git clone https://github.com/gon2410/rsvp_backend.git`
+```git clone https://github.com/gon2410/rsvp_backend.git```
 
 ### 2. Move into the directory and create a python virtual environment
 `cd rsvp_backend && virtualenv .`
