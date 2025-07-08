@@ -25,11 +25,13 @@ However, you can easily connect your own Supabase instance by updating the .env 
     pip install -r requirement.txt
 ```
 
-### 5. Create a .env file
+### 5. Create a .env file with the following constants
 ```
     SUPABASE_URL=<supabase_db_url>
     SUPABASE_KEY=<key>
 ```
 
 ### 5. Run
-`fastapi dev main.py`
+```
+    fastapi dev main.py
+```

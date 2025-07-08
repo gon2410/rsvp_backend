@@ -16,6 +16,7 @@ supabase: Client = create_client(url, key)
 
 app = FastAPI()
 
+# configuring CORS to only accept request from one origin
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://127.0.0.1:3000"],
@@ -39,6 +40,7 @@ class User(BaseModel):
     email: str
     passwd: str
 
+# get user instance to check if it's authenticated or not
 @app.get("/auth/status")
 def get_user(request: Request):
     token_cookie = None
@@ -58,6 +60,7 @@ def get_user(request: Request):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+# login user
 @app.post("/auth/login")
 def login_user(user: User, response: Response):
     auth_response = supabase.auth.sign_in_with_password(
@@ -79,13 +82,14 @@ def login_user(user: User, response: Response):
         key=cookie_name,
         value=token,
         httponly=True,
-        secure=True,  # True en producción con HTTPS
+        secure=True,
         samesite="None",
         path="/"
     )
     
     return response
 
+# logout user
 @app.post("/auth/logout")
 def logout_user(request: Request):
     token_cookie = None
@@ -109,6 +113,7 @@ def logout_user(request: Request):
     )
     return response
 
+# get all users from database
 @app.get("/")
 def get_all_guests():
     try:
@@ -122,6 +127,7 @@ def get_all_guests():
         return JSONResponse(status_code=500, content={"error": "Hubo un error en la consulta"})
 
 
+# add user
 roles = ["leader", "companion"]
 menus = ["sin_condicion", "vegetariano", "vegano", "celiaco"]
 
@@ -170,7 +176,7 @@ def add_guest(guest: Guest):
 
     return JSONResponse(status_code=200, content="¡Confirmado!")
 
-
+# get group members associated with an email
 @app.post("/getgroup")
 def get_group(group: Group):
     group_list = []
