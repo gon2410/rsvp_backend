@@ -6,16 +6,24 @@ Note: You won't be able to use my Supabase project because the API keys are priv
 However, you can easily connect your own Supabase instance by updating the .env file.
 
 ### 1. Clone the repository
-```git clone https://github.com/gon2410/rsvp_backend.git```
+```
+    git clone https://github.com/gon2410/rsvp_backend.git
+```
 
 ### 2. Move into the directory and create a python virtual environment
-`cd rsvp_backend && virtualenv .`
+```
+    cd rsvp_backend && virtualenv .
+```
 
 ### 3. Activate the virtual environment
-`source bin/activate`
+```
+    source bin/activate
+```
 
 ### 4. Install all the requirements
-`pip install -r requirement.txt`
+```
+    pip install -r requirement.txt
+```
 
 ### 5. Create a .env file
 ```
