@@ -112,12 +112,11 @@ def logout_user(request: Request):
         path="/"
     )
     return response
-
 # get all users from database
 @app.get("/")
 def get_all_guests():
     try:
-        response = supabase.table("person").select('*').execute()
+        response = supabase.table("person").select('id', 'name', 'lastname').eq("is_leader", True).execute()
 
         if response.data.count == 0:
             return JSONResponse(status_code=404, content={"error": "No se encontró nada en la base de datos"})
@@ -126,6 +125,27 @@ def get_all_guests():
     except:
         return JSONResponse(status_code=500, content={"error": "Hubo un error en la consulta"})
 
+# get all users from database
+@app.get("/getall")
+def get_all_guests(request: Request):
+    token_cookie = None
+    for name in request.cookies:
+        if "auth-token" in name:
+            token_cookie = request.cookies[name]
+            break
+    
+    if token_cookie:
+        try:
+            response = supabase.table("person").select('*').execute()
+
+            if response.data.count == 0:
+                return JSONResponse(status_code=404, content={"error": "No se encontró nada en la base de datos"})
+            
+            return response.data
+        except:
+            return JSONResponse(status_code=500, content={"error": "Hubo un error en la consulta"})
+    else:
+        raise HTTPException(status_code=401, detail="Prohibido")
 
 # add user
 roles = ["leader", "companion"]
