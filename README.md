@@ -18,10 +18,15 @@ https://github.com/gon2410/rsvp_frontend
 
 ## Installation
 ```
-    https://github.com/gon2410/rsvp_backend.git
+    git clone https://github.com/gon2410/rsvp_backend.git
     cd rsvp_backend
     virtualenv .
     source bin/activate
     pip install -r requirements.txt
-    fastapi dev main.py
+```
+
+### Create .env file
+```
+SUPABASE_URL=your-supabase-url
+SUPABASE_KEY=your-supabase-key
 ```
