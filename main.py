@@ -1,6 +1,4 @@
 import os
-import base64
-import json
 from fastapi import FastAPI, Request, HTTPException, Response
 from fastapi.responses import JSONResponse
 from supabase import create_client, Client
