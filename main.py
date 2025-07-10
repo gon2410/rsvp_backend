@@ -19,7 +19,7 @@ app = FastAPI()
 # configuring CORS to only accept request from one origin
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:3000"],
+    allow_origins=["http://127.0.0.1:3000", "https://form-supa-next.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
