@@ -1,37 +1,18 @@
 # FastAPI + Supabase Backend
+This the backend application for the Next.js project.
 
-## Installation
+:heavy_exclamation_mark: ** You won't be able to use my Supabase project because the API keys are private.
+However, you can easily connect your own Supabase instance by creating an .env file.**
 
-Note: You won't be able to use my Supabase project because the API keys are private.
-However, you can easily connect your own Supabase instance by updating the .env file.
+## Stack
+### Frontend
+- Next.js
+- ShadCN
+- Tailwind
 
-### 1. Clone the repository
-```
-    git clone https://github.com/gon2410/rsvp_backend.git
-```
+:link: The frontend for this project can be found here:
+https://github.com/gon2410/rsvp_frontend
 
-### 2. Move into the directory and create a python virtual environment
-```
-    cd rsvp_backend && virtualenv .
-```
-
-### 3. Activate the virtual environment
-```
-    source bin/activate
-```
-
-### 4. Install all the requirements
-```
-    pip install -r requirement.txt
-```
-
-### 5. Create a .env file with the following constants
-```
-    SUPABASE_URL=<supabase_db_url>
-    SUPABASE_KEY=<key>
-```
-
-### 5. Run
-```
-    fastapi dev main.py
-```
+### Backend
+- FastAPI
+- Supabase
