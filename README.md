@@ -1,8 +1,7 @@
 # FastAPI + Supabase Backend
 This the backend application for the Next.js project.
 
-:heavy_exclamation_mark: ** You won't be able to use my Supabase project because the API keys are private.
-However, you can easily connect your own Supabase instance by creating an .env file.**
+:heavy_exclamation_mark: **You won't be able to use my Supabase project because the API keys are private. However, you can easily connect your own Supabase instance by creating an .env file.**
 
 ## Stack
 ### Frontend
