@@ -6,15 +6,18 @@ from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+
 load_dotenv()
+
 
 url = os.environ.get("SUPABASE_URL")
 key = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
+
 app = FastAPI()
 
-# configuring CORS to only accept request from one origin
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://127.0.0.1:3000", "https://form-supa-next.vercel.app"],
@@ -22,6 +25,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
 
 class Guest(BaseModel):
     name: str
@@ -38,7 +42,7 @@ class User(BaseModel):
     email: str
     passwd: str
 
-# get user instance to check if it's authenticated or not
+
 @app.get("/auth/status")
 def get_user(request: Request):
     token_cookie = None
@@ -58,7 +62,7 @@ def get_user(request: Request):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-# login user
+
 @app.post("/auth/login")
 def login_user(user: User, response: Response):
     auth_response = supabase.auth.sign_in_with_password(
@@ -87,7 +91,7 @@ def login_user(user: User, response: Response):
     
     return response
 
-# logout user
+
 @app.post("/auth/logout")
 def logout_user(request: Request):
     token_cookie = None
@@ -110,9 +114,10 @@ def logout_user(request: Request):
         path="/"
     )
     return response
-# get all users from database
+
+
 @app.get("/")
-def get_all_guests():
+def get_all_leaders():
     try:
         response = supabase.table("person").select('id', 'name', 'lastname').eq("is_leader", True).execute()
 
@@ -123,7 +128,7 @@ def get_all_guests():
     except:
         return JSONResponse(status_code=500, content={"error": "Hubo un error en la consulta"})
 
-# get all users from database
+
 @app.get("/getall")
 def get_all_guests(request: Request):
     token_cookie = None
@@ -145,10 +150,9 @@ def get_all_guests(request: Request):
     else:
         raise HTTPException(status_code=401, detail="Prohibido")
 
-# add user
+
 roles = ["leader", "companion"]
 menus = ["sin_condicion", "vegetariano", "vegano", "celiaco"]
-
 @app.post("/add")
 def add_guest(guest: Guest):
 
@@ -194,7 +198,7 @@ def add_guest(guest: Guest):
 
     return JSONResponse(status_code=200, content="¡Confirmado!")
 
-# get group members associated with an email
+
 @app.post("/getgroup")
 def get_group(group: Group):
     group_list = []
