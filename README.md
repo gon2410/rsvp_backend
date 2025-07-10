@@ -15,3 +15,13 @@ https://github.com/gon2410/rsvp_frontend
 ### Backend
 - FastAPI
 - Supabase
+
+## Installation
+```
+    https://github.com/gon2410/rsvp_backend.git
+    cd rsvp_backend
+    virtualenv .
+    source bin/activate
+    pip install -r requirements.txt
+    fastapi dev main.py
+```
