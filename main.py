@@ -20,40 +20,27 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:3000", "https://form-supa-next.vercel.app"],
+    allow_origins=["http://127.0.0.1:3000", "http://192.168.100.61:3000", "https://form-supa-next.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
 )
 
 
-class Guest(BaseModel):
-    name: str
-    lastname: str
-    menu: str
-    role: str
-    email: str
-    leader: str
-
-class Group(BaseModel):
-    email: str
-
-class User(BaseModel):
-    email: str
-    passwd: str
-
-
 @app.get("/auth/status")
 def get_user(request: Request):
+    cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
+
+    raw_cookie_header = request.headers.get("cookie", "")
     token_cookie = None
-    for name in request.cookies:
-        if "auth-token" in name:
-            token_cookie = request.cookies[name]
+    for cookie in raw_cookie_header.split(";"):
+        if cookie_name in cookie:
+            token_cookie = cookie.split("=")[1].strip()
             break
-    
+
     if not token_cookie:
         raise HTTPException(status_code=401, detail="No autenticado")
-
+    
     try:
         user_response = supabase.auth.get_user(token_cookie)
         if user_response.user is None:
@@ -62,6 +49,10 @@ def get_user(request: Request):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+
+class User(BaseModel):
+    email: str
+    passwd: str
 
 @app.post("/auth/login")
 def login_user(user: User, response: Response):
@@ -93,33 +84,40 @@ def login_user(user: User, response: Response):
 
 
 @app.post("/auth/logout")
-def logout_user(request: Request):
+def logout_user(request: Request, response: Response):
+    cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
+
+    raw_cookie_header = request.headers.get("cookie", "")
     token_cookie = None
-    for name in request.cookies:
-        if "auth-token" in name:
-            token_cookie = request.cookies[name]
+    for cookie in raw_cookie_header.split(";"):
+        if cookie_name in cookie:
+            token_cookie = cookie.split("=")[1].strip()
             break
 
-    cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
-    
-    if token_cookie:
-        try:
-            supabase.auth.sign_out(token_cookie)
-        except Exception as e:
-            print("Error")
+    if not token_cookie:
+        raise HTTPException(status_code=401, detail="No esta logueado")
 
-    response = JSONResponse(status_code=200, content="Sesion cerrada")
+    try:
+        supabase.auth.sign_out(token_cookie)
+    except Exception as e:
+        print("Error")
+    
+    response = JSONResponse(content={"message": "Logout exitoso"})
+
     response.delete_cookie(
         key=cookie_name,
-        path="/"
-    )
+        httponly=True,
+        secure=True,
+        samesite="None",
+        path="/")
+
     return response
 
 
 @app.get("/")
 def get_all_leaders():
     try:
-        response = supabase.table("person").select('id', 'name', 'lastname').eq("is_leader", True).execute()
+        response = supabase.table("person").select('id', 'name', 'lastname', 'created_at').eq("is_leader", True).execute()
 
         if response.data.count == 0:
             return JSONResponse(status_code=404, content={"error": "No se encontró nada en la base de datos"})
@@ -139,7 +137,7 @@ def get_all_guests(request: Request):
     
     if token_cookie:
         try:
-            response = supabase.table("person").select('*').execute()
+            response = supabase.table("person").select('*').order("lastname").execute()
 
             if response.data.count == 0:
                 return JSONResponse(status_code=404, content={"error": "No se encontró nada en la base de datos"})
@@ -151,8 +149,17 @@ def get_all_guests(request: Request):
         raise HTTPException(status_code=401, detail="Prohibido")
 
 
+class Guest(BaseModel):
+    name: str
+    lastname: str
+    menu: str
+    role: str
+    email: str
+    leader: str
+
 roles = ["leader", "companion"]
 menus = ["sin_condicion", "vegetariano", "vegano", "celiaco"]
+
 @app.post("/add")
 def add_guest(guest: Guest):
 
@@ -199,6 +206,9 @@ def add_guest(guest: Guest):
     return JSONResponse(status_code=200, content="¡Confirmado!")
 
 
+class Group(BaseModel):
+    email: str
+
 @app.post("/getgroup")
 def get_group(group: Group):
     group_list = []
@@ -219,3 +229,44 @@ def get_group(group: Group):
         group_list.append(member)
 
     return JSONResponse(status_code=200, content=group_list)
+
+
+class EditGuest(BaseModel):
+    id: str
+    name: str
+    lastname: str
+    menu: str
+
+@app.post("/editguest")
+def edit_guest(edit_guest: EditGuest, request: Request):
+    token_cookie = None
+    for name in request.cookies:
+        if "auth-token" in name:
+            token_cookie = request.cookies[name]
+            break
+
+    if not token_cookie:
+        raise HTTPException(status_code=401, detail="No tenés permiso")
+    
+    response = supabase.table("person").update({"name": edit_guest.name, "lastname": edit_guest.lastname, "menu": edit_guest.menu}).eq("id", edit_guest.id).execute()
+
+    print(response)
+    return JSONResponse(status_code=200, content="Guardado")
+
+
+
+@app.get("/getnumbers")
+def get_numbers():
+    total = supabase.table("person").select("id", count="exact").execute()
+    sin_condicion = supabase.table("person").select("id", count="exact").eq("menu", "sin_condicion").execute()
+    vegetariano = supabase.table("person").select("id", count="exact").eq("menu", "vegetariano").execute()
+    vegano = supabase.table("person").select("id", count="exact").eq("menu", "vegano").execute()
+    celiaco = supabase.table("person").select("id", count="exact").eq("menu", "celiaco").execute()
+    
+    data = [{"menu_name": "Total", "quantity": total.count},
+            {"menu_name": "Sin Condicion", "quantity": sin_condicion.count},
+            {"menu_name": "Vegetariano", "quantity": vegetariano.count},
+            {"menu_name": "Vegano", "quantity": vegano.count},
+            {"menu_name": "Celiaco", "quantity": celiaco.count}]
+    
+    return JSONResponse(status_code=200, content=data)
