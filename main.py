@@ -38,6 +38,7 @@ def get_user(request: Request):
             token_cookie = cookie.split("=")[1].strip()
             break
 
+    print(token_cookie)
     if not token_cookie:
         raise HTTPException(status_code=401, detail="No autenticado")
     
