@@ -38,7 +38,6 @@ def get_user(request: Request):
             token_cookie = cookie.split("=")[1].strip()
             break
 
-    print(token_cookie)
     if not token_cookie:
         raise HTTPException(status_code=401, detail="No autenticado")
     
@@ -118,7 +117,7 @@ def logout_user(request: Request, response: Response):
 @app.get("/")
 def get_all_leaders():
     try:
-        response = supabase.table("person").select('id', 'name', 'lastname', 'created_at').eq("is_leader", True).execute()
+        response = supabase.table("person").select('id', 'name', 'lastname', 'created_at').eq("is_leader", True).order("lastname").execute()
 
         if response.data.count == 0:
             return JSONResponse(status_code=404, content={"error": "No se encontró nada en la base de datos"})
