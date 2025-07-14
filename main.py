@@ -75,8 +75,8 @@ def login_user(user: User, response: Response):
         key=cookie_name,
         value=token,
         httponly=True,
-        secure=True,
-        samesite="None",
+        secure=False,
+        samesite="Lax",
         path="/",
     )
     
