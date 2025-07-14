@@ -68,7 +68,7 @@ def login_user(user: User, response: Response):
 
     cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
     token = auth_response.session.access_token
-
+    print(token)
     response = JSONResponse(content={"message": "Login exitoso"})
     
     response.set_cookie(
