@@ -77,7 +77,8 @@ def login_user(user: User, response: Response):
         httponly=True,
         secure=True,
         samesite="None",
-        path="/"
+        path="/",
+        domain=".vercel.app"
     )
     
     return response
