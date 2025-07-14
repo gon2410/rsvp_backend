@@ -75,10 +75,14 @@ def login_user(user: User, response: Response):
         key=cookie_name,
         value=token,
         httponly=True,
-        secure=False,
-        samesite="Lax",
+        secure=True,
+        samesite="None",
         path="/",
     )
+
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Origin"] = "https://form-supa-next.vercel.app"
+
     
     return response
 
