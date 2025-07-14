@@ -78,7 +78,6 @@ def login_user(user: User, response: Response):
         secure=True,
         samesite="None",
         path="/",
-        domain=".vercel.app"
     )
     
     return response
@@ -111,7 +110,7 @@ def logout_user(request: Request, response: Response):
         httponly=True,
         secure=True,
         samesite="None",
-        path="/"
+        path="/",
     )
 
     return response
