@@ -86,8 +86,8 @@ def login_user(user: User, response: Response):
 @app.post("/auth/logout")
 def logout_user(request: Request, response: Response):
     cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
-
     raw_cookie_header = request.headers.get("cookie", "")
+
     token_cookie = None
     for cookie in raw_cookie_header.split(";"):
         if cookie_name in cookie:
@@ -98,7 +98,8 @@ def logout_user(request: Request, response: Response):
         raise HTTPException(status_code=401, detail="No esta logueado")
 
     try:
-        supabase.auth.sign_out(token_cookie)
+        supabase.auth.sign_out()
+        print("loged out")
     except Exception as e:
         print("Error")
     
@@ -109,7 +110,8 @@ def logout_user(request: Request, response: Response):
         httponly=True,
         secure=True,
         samesite="None",
-        path="/")
+        path="/"
+    )
 
     return response
 
