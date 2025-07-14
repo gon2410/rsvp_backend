@@ -20,7 +20,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:3000", "http://192.168.100.61:3000", "https://form-supa-next.vercel.app"],
+    allow_origins=["https://form-supa-next.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
