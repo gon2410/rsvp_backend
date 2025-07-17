@@ -76,7 +76,8 @@ def login_user(user: User, response: Response):
         value=token,
         httponly=True,
         secure=True,
-        samesite="none",
+        samesite=None,
+        max_age=None,
         path="/",
     )
 
