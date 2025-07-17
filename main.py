@@ -55,7 +55,7 @@ class User(BaseModel):
     passwd: str
 
 @app.post("/auth/login")
-def login_user(user: User, response: Response):
+def login_user(user: User):
     auth_response = supabase.auth.sign_in_with_password(
         {
             "email": user.email,
@@ -77,7 +77,6 @@ def login_user(user: User, response: Response):
         httponly=True,
         secure=True,
         samesite="none",
-        max_age=None,
         path="/",
     )
     
