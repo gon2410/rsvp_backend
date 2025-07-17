@@ -72,18 +72,14 @@ def login_user(user: User, response: Response):
     response = JSONResponse(content={"message": "Login exitoso"})
     
     response.set_cookie(
-        key=cookie_name,
+        cookie_name,
         value=token,
         httponly=True,
         secure=True,
-        samesite=None,
+        samesite="none",
         max_age=None,
         path="/",
     )
-
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Allow-Origin"] = "https://form-supa-next.vercel.app"
-
     
     return response
 
