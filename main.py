@@ -55,7 +55,7 @@ class User(BaseModel):
     passwd: str
 
 @app.post("/auth/login")
-def login_user(user: User):
+def login_user(user: User, response: Response):
     auth_response = supabase.auth.sign_in_with_password(
         {
             "email": user.email,
@@ -68,8 +68,6 @@ def login_user(user: User):
 
     cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
     token = auth_response.session.access_token
-    print(token)
-    response = JSONResponse(content={"message": "Login exitoso"})
     
     response.set_cookie(
         cookie_name,
@@ -80,7 +78,7 @@ def login_user(user: User):
         path="/",
     )
     
-    return response
+    return {"message": "Login exitoso"}
 
 
 @app.post("/auth/logout")
