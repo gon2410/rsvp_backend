@@ -74,7 +74,7 @@ def login_user(user: User, response: Response):
         httponly=True,
         secure=True,
         samesite="none",
-        path="/admin",
+        path="/",
     )
     
     return {"message": "Login exitoso"}
