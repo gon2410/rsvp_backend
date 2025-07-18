@@ -66,11 +66,10 @@ def login_user(user: User, response: Response):
     if not auth_response.session:
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
-    cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
     token = auth_response.session.access_token
     
     response.set_cookie(
-        cookie_name,
+        key="auth-cookie",
         value=token,
         httponly=True,
         secure=True,
