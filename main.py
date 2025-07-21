@@ -230,16 +230,19 @@ class EditGuest(BaseModel):
 
 @app.post("/editguest")
 def edit_guest(edit_guest: EditGuest, request: Request):
-    token_cookie = None
-    for name in request.cookies:
-        if "auth-token" in name:
-            token_cookie = request.cookies[name]
-            break
+    # token_cookie = None
+    # for name in request.cookies:
+    #     if "auth-token" in name:
+    #         token_cookie = request.cookies[name]
+    #         break
 
-    if not token_cookie:
-        raise HTTPException(status_code=401, detail="No tenés permiso")
+    # if not token_cookie:
+    #     raise HTTPException(status_code=401, detail="No tenés permiso")
     
-    response = supabase.table("person").update({"name": edit_guest.name, "lastname": edit_guest.lastname, "menu": edit_guest.menu}).eq("id", edit_guest.id).execute()
+    try:
+        response = supabase.table("person").update({"name": edit_guest.name, "lastname": edit_guest.lastname, "menu": edit_guest.menu}).eq("id", edit_guest.id).execute()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Algo salio mal.")
 
     print(response)
     return JSONResponse(status_code=200, content="Guardado")
