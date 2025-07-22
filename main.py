@@ -82,12 +82,11 @@ def login_user(user: User, response: Response):
 
 @app.post("/auth/logout")
 def logout_user(request: Request, response: Response):
-    cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
     raw_cookie_header = request.headers.get("cookie", "")
 
     token_cookie = None
     for cookie in raw_cookie_header.split(";"):
-        if cookie_name in cookie:
+        if "auth-cookie" in cookie:
             token_cookie = cookie.split("=")[1].strip()
             break
 
@@ -103,7 +102,7 @@ def logout_user(request: Request, response: Response):
     response = JSONResponse(content={"message": "Logout exitoso"})
 
     response.delete_cookie(
-        key=cookie_name,
+        key="auth-cookie",
         httponly=True,
         secure=True,
         samesite="None",
