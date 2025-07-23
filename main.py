@@ -81,21 +81,9 @@ def login_user(user: User, response: Response):
 
 
 @app.post("/auth/logout")
-def logout_user(request: Request, response: Response):
-    raw_cookie_header = request.headers.get("cookie", "")
-
-    token_cookie = None
-    for cookie in raw_cookie_header.split(";"):
-        if "auth-cookie" in cookie:
-            token_cookie = cookie.split("=")[1].strip()
-            break
-
-    if not token_cookie:
-        raise HTTPException(status_code=401, detail="No esta logueado")
-
+def logout_user(response: Response):
     try:
         supabase.auth.sign_out()
-        print("loged out")
     except Exception as e:
         print("Error")
     
@@ -220,6 +208,27 @@ def get_group(group: Group):
 
     return JSONResponse(status_code=200, content=group_list)
 
+class Error(BaseModel):
+    email: str
+    description: str
+
+@app.post("/report-error")
+def report_error(error: Error):
+
+    if error.email == "":
+        raise HTTPException(status_code=400, detail="Email inválido")
+
+    response = supabase.table("person").select("*").eq("email", error.email).execute()
+    if not response.data:
+        raise HTTPException(status_code=404, detail="No pudimos encontrar esa direccion de email")
+    
+    # response = supabase.table("person").select("*").eq("email", group.email).execute()
+
+    # if not response.data:
+    #     raise HTTPException(status_code=404, detail="No pudimos encontrar esa direccion de email")
+
+
+    return JSONResponse(status_code=200, content="Enviado")
 
 class EditGuest(BaseModel):
     id: str
