@@ -26,7 +26,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-
 @app.get("/auth/status")
 def get_user(request: Request):
     cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
@@ -222,11 +221,11 @@ def report_error(error: Error):
     if not response.data:
         raise HTTPException(status_code=404, detail="No pudimos encontrar esa direccion de email")
     
-    # response = supabase.table("person").select("*").eq("email", group.email).execute()
-
-    # if not response.data:
-    #     raise HTTPException(status_code=404, detail="No pudimos encontrar esa direccion de email")
-
+    try:
+        response = supabase.table("errors").insert({"email": error.email, "description": error.description}).execute()
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Algo salió mal.")
 
     return JSONResponse(status_code=200, content="Enviado")
 
@@ -238,21 +237,21 @@ class EditGuest(BaseModel):
 
 @app.post("/editguest")
 def edit_guest(edit_guest: EditGuest, request: Request):
-    # token_cookie = None
-    # for name in request.cookies:
-    #     if "auth-token" in name:
-    #         token_cookie = request.cookies[name]
-    #         break
+    cookie_token = None
+    for cookie in request.cookies:
+        print(cookie)
+        if "auth-cookie" in cookie:
+            cookie_token = request.cookies[cookie]
+            break
 
-    # if not token_cookie:
-    #     raise HTTPException(status_code=401, detail="No tenés permiso")
-    
+    if not cookie_token:
+        raise HTTPException(status_code=401, detail="Prohibido si no estas logueado")
     try:
         response = supabase.table("person").update({"name": edit_guest.name, "lastname": edit_guest.lastname, "menu": edit_guest.menu}).eq("id", edit_guest.id).execute()
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=400, detail="Algo salio mal.")
 
-    print(response)
     return JSONResponse(status_code=200, content="Guardado")
 
 
