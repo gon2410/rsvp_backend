@@ -112,7 +112,7 @@ def get_all_leaders():
         return JSONResponse(status_code=500, content={"error": "Hubo un error en la consulta"})
 
 
-@app.get("/getall")
+@app.get("/get-all-guests")
 def get_all_guests(request: Request):
     try:
         response = supabase.table("person").select('*').order("lastname").execute()
@@ -137,7 +137,7 @@ class Guest(BaseModel):
 roles = ["leader", "companion"]
 menus = ["sin_condicion", "vegetariano", "vegano", "celiaco"]
 
-@app.post("/add")
+@app.post("/add-guest")
 def add_guest(guest: Guest):
 
     if guest.name == "":
@@ -186,7 +186,7 @@ def add_guest(guest: Guest):
 class Group(BaseModel):
     email: str
 
-@app.post("/getgroup")
+@app.post("/get-group")
 def get_group(group: Group):
     group_list = []
     if group.email == "":
@@ -235,11 +235,10 @@ class EditGuest(BaseModel):
     lastname: str
     menu: str
 
-@app.post("/editguest")
+@app.post("/update-guest")
 def edit_guest(edit_guest: EditGuest, request: Request):
     cookie_token = None
     for cookie in request.cookies:
-        print(cookie)
         if "auth-cookie" in cookie:
             cookie_token = request.cookies[cookie]
             break
@@ -256,7 +255,7 @@ def edit_guest(edit_guest: EditGuest, request: Request):
 
 
 
-@app.get("/getnumbers")
+@app.get("/get-statistics")
 def get_numbers():
     total = supabase.table("person").select("id", count="exact").execute()
     sin_condicion = supabase.table("person").select("id", count="exact").eq("menu", "sin_condicion").execute()
