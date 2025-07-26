@@ -5,7 +5,7 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-
+import string
 
 load_dotenv()
 
@@ -136,14 +136,14 @@ class Guest(BaseModel):
 
 roles = ["leader", "companion"]
 menus = ["sin_condicion", "vegetariano", "vegano", "celiaco"]
-
+invalid_characters = tuple(string.punctuation + string.digits + "¨" + "´" + "`" + "¿")
 @app.post("/add-guest")
 def add_guest(guest: Guest):
 
-    if guest.name == "":
+    if guest.name == "" or any(invalid_character in guest.name for invalid_character in invalid_characters):
         raise HTTPException(status_code=400, detail="Nombre inválido")
         
-    if guest.lastname == "":
+    if guest.lastname == "" or any(invalid_character in guest.lastname for invalid_character in invalid_characters):
         raise HTTPException(status_code=400, detail="Apellido inválido")
 
     if guest.menu not in menus:
@@ -243,6 +243,12 @@ def edit_guest(edit_guest: EditGuest, request: Request):
             cookie_token = request.cookies[cookie]
             break
 
+    if edit_guest.name == "" or any(invalid_character in edit_guest.name for invalid_character in invalid_characters):
+        raise HTTPException(status_code=400, detail="Nombre inválido")
+        
+    if edit_guest.lastname == "" or any(invalid_character in edit_guest.lastname for invalid_character in invalid_characters):
+        raise HTTPException(status_code=400, detail="Apellido inválido")
+    
     if not cookie_token:
         raise HTTPException(status_code=401, detail="Prohibido si no estas logueado")
     try:
@@ -253,7 +259,39 @@ def edit_guest(edit_guest: EditGuest, request: Request):
 
     return JSONResponse(status_code=200, content="Guardado")
 
+class DeleteGuest(BaseModel):
+    id: int
+@app.post("/delete-guest")
+def delete_guest(guest_to_delete: DeleteGuest, request: Request):
+    cookie_token = None
+    for cookie in request.cookies:
+        if "auth-cookie" in cookie:
+            cookie_token = request.cookies[cookie]
+            break
 
+    if not cookie_token:
+        raise HTTPException(status_code=401, detail="Prohibido si no estas logueado")
+    
+    try:
+        response = supabase.table("person").select("id", "is_leader").eq("id", guest_to_delete.id).execute()
+        
+        if not response:
+            raise HTTPException(status_code=404, detail="No pudimos encontrar al invitado")
+        
+        guest = response.data[0]
+        
+        if guest["is_leader"] == True:
+            raise HTTPException(status_code=400, detail="No se puede eliminar a líderes")
+        else:
+            try:
+                response = supabase.table("person").delete().eq("id", guest_to_delete.id).execute()
+            except Exception as e:
+                raise HTTPException(status_code=400, detail="No se pudo eliminar al invitado")
+    except Exception as e:
+        print(e)
+        
+
+    return JSONResponse(status_code=200, content="Eliminado")
 
 @app.get("/get-statistics")
 def get_numbers():
