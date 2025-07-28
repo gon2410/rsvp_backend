@@ -21,7 +21,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://form-supa-next.vercel.app", "http://127.0.0.1:3000"],
+    allow_origins=["https://form-supa-next.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -266,7 +266,7 @@ def edit_guest(edit_guest: EditGuest, request: Request):
         if not response or not response.user:
             raise HTTPException(status_code=401, detail="No estás autorizado.")
     except AuthApiError as e:
-        raise HTTPException(status_code=401, detail="Token inválido o no estás autorizado.")
+        raise HTTPException(status_code=401, detail="Token inválido, expirado o no estás autorizado.")
     except HTTPError:
         raise HTTPException(status_code=503, detail="No pudimos autenticarte.")
     except Exception:
