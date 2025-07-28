@@ -8,6 +8,7 @@ import string
 from schemas import *
 from httpx import HTTPError
 from gotrue.errors import AuthApiError
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -26,6 +27,34 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+class User(BaseModel):
+    email: str
+    passwd: str
+
+class Guest(BaseModel):
+    name: str
+    lastname: str
+    menu: str
+    role: str
+    email: str
+    leader: str
+
+class Group(BaseModel):
+    email: str
+
+class Error(BaseModel):
+    email: str
+    description: str
+
+class EditGuest(BaseModel):
+    id: str
+    name: str
+    lastname: str
+    menu: str
+
+class DeleteGuest(BaseModel):
+    id: int
 
 # ---------- AUTHENTICATION ENDPOINTS ----------
 
