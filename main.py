@@ -5,7 +5,6 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 import string
-from schemas import *
 from httpx import HTTPError
 from gotrue.errors import AuthApiError
 from pydantic import BaseModel
