@@ -249,6 +249,7 @@ def get_numbers():
 def edit_guest(edit_guest: EditGuest, request: Request):
 
     # getting the auth-cookie from the request
+    print(request.cookies)
     cookie_token = None
     for cookie in request.cookies:
         if "auth-cookie" in cookie:
