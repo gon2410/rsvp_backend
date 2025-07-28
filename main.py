@@ -29,27 +29,27 @@ app.add_middleware(
 
 # ---------- AUTHENTICATION ENDPOINTS ----------
 
-# @app.get("/auth/status")
-# def get_user(request: Request):
-#     cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
+@app.get("/auth/status")
+def get_user(request: Request):
+    cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
 
-#     raw_cookie_header = request.headers.get("cookie", "")
-#     token_cookie = None
-#     for cookie in raw_cookie_header.split(";"):
-#         if cookie_name in cookie:
-#             token_cookie = cookie.split("=")[1].strip()
-#             break
+    raw_cookie_header = request.headers.get("cookie", "")
+    token_cookie = None
+    for cookie in raw_cookie_header.split(";"):
+        if cookie_name in cookie:
+            token_cookie = cookie.split("=")[1].strip()
+            break
 
-#     if not token_cookie:
-#         raise HTTPException(status_code=401, detail="No autenticado")
+    if not token_cookie:
+        raise HTTPException(status_code=401, detail="No autenticado")
     
-#     try:
-#         user_response = supabase.auth.get_user(token_cookie)
-#         if user_response.user is None:
-#             raise HTTPException(status_code=401, detail="Token inválido")
-#         return {"user": user_response.user}
-#     except Exception as e:
-#         return JSONResponse(status_code=500, content={"error": str(e)})
+    try:
+        user_response = supabase.auth.get_user(token_cookie)
+        if user_response.user is None:
+            raise HTTPException(status_code=401, detail="Token inválido")
+        return {"user": user_response.user}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 
 @app.post("/auth/login")
