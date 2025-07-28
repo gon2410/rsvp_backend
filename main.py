@@ -21,7 +21,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://form-supa-next.vercel.app"],
+    allow_origins=["https://form-supa-next.vercel.app", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -249,12 +249,8 @@ def get_numbers():
 def edit_guest(edit_guest: EditGuest, request: Request):
 
     # getting the auth-cookie from the request
-    print(request.cookies)
-    cookie_token = None
-    for cookie in request.cookies:
-        if "auth-cookie" in cookie:
-            cookie_token = request.cookies[cookie]
-            break
+    cookie_token = request.cookies.get("auth-cookie")
+    print(cookie_token)
 
     # if cookie does not exist, return 401
     if not cookie_token:
@@ -292,11 +288,8 @@ def edit_guest(edit_guest: EditGuest, request: Request):
 def delete_guest(guest_to_delete: DeleteGuest, request: Request):
 
     # getting the auth-cookie from the request
-    cookie_token = None
-    for cookie in request.cookies:
-        if "auth-cookie" in cookie:
-            cookie_token = request.cookies[cookie]
-            break
+    cookie_token = request.cookies.get("auth-cookie")
+    print(cookie_token)
 
     # if cookie does not exist, return 401
     if not cookie_token:
