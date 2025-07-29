@@ -278,7 +278,6 @@ def edit_guest(edit_guest: EditGuest, request: Request):
 
     # getting the auth-cookie from the request
     cookie_token = request.cookies.get("auth-cookie")
-    print(cookie_token)
 
     # if cookie does not exist, return 401
     if not cookie_token:
@@ -317,7 +316,6 @@ def delete_guest(guest_to_delete: DeleteGuest, request: Request):
 
     # getting the auth-cookie from the request
     cookie_token = request.cookies.get("auth-cookie")
-    print(cookie_token)
 
     # if cookie does not exist, return 401
     if not cookie_token:
