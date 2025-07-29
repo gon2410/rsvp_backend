@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import string
 from httpx import HTTPError
 from gotrue.errors import AuthApiError
-from pydantic import BaseModel
+from schemas import *
 
 load_dotenv()
 
@@ -15,9 +15,7 @@ url = os.environ.get("SUPABASE_URL")
 key = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
-
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,58 +25,8 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-class User(BaseModel):
-    email: str
-    passwd: str
-
-class Guest(BaseModel):
-    name: str
-    lastname: str
-    menu: str
-    role: str
-    email: str
-    leader: str
-
-class Group(BaseModel):
-    email: str
-
-class Error(BaseModel):
-    email: str
-    description: str
-
-class EditGuest(BaseModel):
-    id: str
-    name: str
-    lastname: str
-    menu: str
-
-class DeleteGuest(BaseModel):
-    id: int
 
 # ---------- AUTHENTICATION ENDPOINTS ----------
-
-@app.get("/auth/status")
-def get_user(request: Request):
-    cookie_name = "sb-" + os.environ.get("SUPABASE_URL").split("https://")[1].split(".")[0] + "-auth-token"
-
-    raw_cookie_header = request.headers.get("cookie", "")
-    token_cookie = None
-    for cookie in raw_cookie_header.split(";"):
-        if cookie_name in cookie:
-            token_cookie = cookie.split("=")[1].strip()
-            break
-
-    if not token_cookie:
-        raise HTTPException(status_code=401, detail="No autenticado")
-    
-    try:
-        user_response = supabase.auth.get_user(token_cookie)
-        if user_response.user is None:
-            raise HTTPException(status_code=401, detail="Token inválido")
-        return {"user": user_response.user}
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
-
 
 @app.post("/auth/login")
 def login_user(user: User, response: Response):
@@ -173,35 +121,59 @@ def add_guest(guest: Guest):
     
     try:
         response = supabase.table("person").select("id").ilike("name", guest.name).ilike("lastname", guest.lastname).execute()
-
         if response.data:
-            raise HTTPException(status_code=400, detail="{} {} ya está registrado".format(guest.name, guest.lastname))
+            raise HTTPException(status_code=400, detail=f"{guest.name} {guest.lastname} ya está registrado.")
+    except HTTPError:
+        raise HTTPException(status_code=503, detail="No pudimos verificar tu nombre. Intente de nuevo.")
+    except HTTPException as e:
+        raise e
+    except Exception:
+        raise HTTPException(status_code=500, detail="Algo salió mal de nuestro lado.")
         
-        if guest.role == "leader":
-            if guest.email == "":
-                raise HTTPException(status_code=400, detail="Email inválido")
-            
+        
+    if guest.role == "leader":
+        if guest.email == "":
+            raise HTTPException(status_code=400, detail="Email inválido")
+        
+        try:
             response = supabase.table("person").select("id").eq("email", guest.email).execute()
             if response.data:
-                raise HTTPException(status_code=400, detail="El e-mail ya está registrado. Quizás esta intentando confirmar un acompañante")
-
+                raise HTTPException(status_code=400, detail="El e-mail ya está en uso. Quizás esta intentando confirmar un acompañante")
+        except HTTPError:
+            raise HTTPException(status_code=503, detail="No pudimos verificar el email. Intente de nuevo.")
+        except HTTPException as e:
+            raise e
+        except Exception:
+            raise HTTPException(status_code=500, detail="Algo salió mal de nuestro lado.")
+        
+        try:
             response = supabase.table("person").insert({"name": guest.name, "lastname": guest.lastname, "menu": guest.menu, "email": guest.email, "is_leader": True}).execute()
-            print(response.data)
-        else:
-            if guest.leader == "":
-                raise HTTPException(status_code=400, detail="ID de líder inválido")
-                
+        except HTTPError:
+            raise HTTPException(status_code=503, detail="No pudimos inscribirte. Intente de nuevo.")
+        except Exception:
+            raise HTTPException(status_code=500, detail="Algo salió mal de nuestro lado.")
+        
+    else:
+        if guest.leader == "":
+            raise HTTPException(status_code=400, detail="ID de líder inválido.")
+        
+        try:
             response = supabase.table("person").select("id").eq("id", guest.leader).execute()
-
             if not response.data:
-                raise HTTPException(status_code=404, detail="No se encontró un invitado líder con ese ID")
-            
+                raise HTTPException(status_code=404, detail="No se encontró un invitado líder con ese ID.")
+        except HTTPError:
+            raise HTTPException(status_code=503, detail="No pudimos verificar al responsable de grupo. Intente de nuevo.")
+        except Exception:
+            raise HTTPException(status_code=500, detail="Algo salió mal de nuestro lado.")
+        
+        try:
             response = supabase.table("person").insert({"name": guest.name, "lastname": guest.lastname, "menu": guest.menu, "companion_of": guest.leader}).execute()
-            print(response.data)
-
-        return JSONResponse(status_code=200, content="¡Confirmado!")
-    except:
-        raise HTTPException(status_code=500, detail="Algo salió mal de nuestro lado.")
+        except HTTPError:
+            raise HTTPException(status_code=503, detail="No pudimos inscribirte. Intente de nuevo.")
+        except Exception:
+            raise HTTPException(status_code=500, detail="Algo salió mal de nuestro lado.")
+        
+    return JSONResponse(status_code=200, content="¡Confirmado!")
 
 
 @app.post("/get-group")
@@ -225,7 +197,11 @@ def get_group(group: Group):
             group_list.append(member)
 
         return JSONResponse(status_code=200, content=group_list)
-    except:
+    except HTTPError:
+        raise HTTPException(status_code=503, detail="No pudimos verificar el email. Intente de nuevo.")
+    except HTTPException as e:
+        raise e
+    except Exception:
         raise HTTPException(status_code=500, detail="Algo salió mal de nuestro lado.")
 
 
@@ -236,18 +212,24 @@ def report_error(error: Error):
         raise HTTPException(status_code=400, detail="Email inválido.")
 
     try:
-        response = supabase.table("person").select("*").eq("email", error.email).execute()
+        response = supabase.table("person").select("id").eq("email", error.email).execute()
         if not response.data:
             raise HTTPException(status_code=404, detail="No pudimos encontrar esa direccion de email.")
-        
-        try:
-            response = supabase.table("errors").insert({"email": error.email, "description": error.description}).execute()
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=400, detail="Algo salió mal.")
-
+    except HTTPError:
+        raise HTTPException(status_code=503, detail="No pudimos verificar el email. Intente de nuevo.")
+    except HTTPException as e:
+        raise e
+    except Exception:
+        raise HTTPException(status_code=500, detail="Algo salió mal de nuestro lado.")
+     
+    try:
+        response = supabase.table("errors").insert({"email": error.email, "description": error.description}).execute()
         return JSONResponse(status_code=200, content="Enviado.")
-    except:
+    except HTTPError:
+        raise HTTPException(status_code=503, detail="No pudimos reportar el error. Intente de nuevo.")
+    except HTTPException as e:
+        raise e
+    except Exception:
         raise HTTPException(status_code=500, detail="Algo salió mal de nuestro lado.")
 
 
