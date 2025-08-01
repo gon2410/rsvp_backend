@@ -21,7 +21,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://form-supa-next.vercel.app"],
+    allow_origins=["https://form-supa-next.vercel.app", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -258,16 +258,8 @@ def get_errors():
 def get_numbers():
     try:
         total = supabase.table("guests").select("id", count="exact").execute()
-        total_no_condition = supabase.table("guests").select("id", count="exact").eq("menu", "sin_condicion").execute()
-        total_vegetarian = supabase.table("guests").select("id", count="exact").eq("menu", "vegetariano").execute()
-        total_vegan = supabase.table("guests").select("id", count="exact").eq("menu", "vegano").execute()
-        total_celiac = supabase.table("guests").select("id", count="exact").eq("menu", "celiaco").execute()
 
-        data = [{"name": "Sin Condición", "quantity": total_no_condition.count},
-                {"name": "Vegetarianos", "quantity": total_vegetarian.count},
-                {"name": "Veganos", "quantity": total_vegan.count},
-                {"name": "Celiacos", "quantity": total_celiac.count},
-                {"name": "Total", "quantity": total.count}]
+        data = [{"name": "Total", "quantity": total.count}]
         
         return JSONResponse(status_code=200, content=data)
     except HTTPError:
