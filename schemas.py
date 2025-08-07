@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+import string
 class User(BaseModel):
     email: str
     passwd: str
@@ -27,3 +27,6 @@ class EditGuest(BaseModel):
 
 class DeleteGuest(BaseModel):
     id: int
+
+roles = ["leader", "companion"]
+invalid_characters = tuple(string.punctuation + string.digits + "¨" + "´" + "`" + "¿")
