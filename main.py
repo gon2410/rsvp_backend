@@ -10,14 +10,14 @@ from supabase_client import supabase
 
 app = FastAPI()
 
+#http://127.0.0.1:3000
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://form-supa-next.vercel.app", "http://127.0.0.1:3000"],
+    allow_origins=["https://form-supa-next.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
 
 # ---------- AUTHENTICATION ENDPOINTS ----------
 
