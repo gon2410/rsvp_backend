@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 from httpx import HTTPError
 from fastapi.responses import JSONResponse
-import string
 from supabase_client import supabase
 from schemas import roles, invalid_characters
 

@@ -43,7 +43,14 @@ def delete_guest(guest_to_delete, request):
     # WORKING ON IT, but for the moment...
     # if the guest is leader, it won't be deleted. If not, it will be.
     if guest["is_leader"]:
-        raise HTTPException(status_code=400, detail="No se puede eliminar a líderes por el momento.")
+        response = supabase.table("guests").select("id").eq("companion_of", guest_to_delete.id).execute()
+
+        if not response or not response.data:
+            # it can be eliminated because it's attending alone
+            response = supabase.table("guests").delete().eq("id", guest_to_delete.id).execute()
+            return JSONResponse(status_code=200, content="Eliminado.")
+        else:
+            raise HTTPException(status_code=400, detail="Este invitado tiene acompañantes, no se puede eliminar.")
     else:
         try:
             response = supabase.table("guests").delete().eq("id", guest_to_delete.id).execute()

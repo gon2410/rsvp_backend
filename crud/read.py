@@ -75,8 +75,12 @@ def get_errors():
 def get_statistics():
     try:
         total = supabase.table("guests").select("id", count="exact").execute()
+        total_leaders = supabase.table("guests").select("id", count="exact").eq("is_leader", True).execute()
+        total_companions = supabase.table("guests").select("id", count="exact").eq("is_leader", False).execute()
 
-        data = [{"name": "Total", "quantity": total.count}]
+        data = [{"name": "Total principales", "quantity": total_leaders.count},
+                {"name": "Total acompañantes", "quantity": total_companions.count},
+                {"name": "Total", "quantity": total.count}]
         
         return JSONResponse(status_code=200, content=data)
     except HTTPError:
